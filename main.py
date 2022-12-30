@@ -61,8 +61,8 @@ def plot_european_put(strike):
     plt.title(f"European derivative with strike price {strike}")
     plt.show()
 
-def binomial_model(r, S_0, N, Delta, U, D, h):
-    dt = Delta / N
+def binomial_model(r, S_0, N, Delta, U, D, h, continuous=True, verbose=False):
+    dt = Delta # it can also be Delta/N, it is a matter of convention
 
     # Create DataFrames to store prices and values of the derivative
     S = pd.DataFrame(index=range(N+1), columns=range(N+1))  # Prices of the underlying asset
@@ -84,7 +84,8 @@ def binomial_model(r, S_0, N, Delta, U, D, h):
     for i in range(N-1, -1, -1):  # Loop over periods
         for j in range(i+1):  # Loop over possible up and down moves
             P.iloc[i, j] = np.exp(-r * dt) * (P.iloc[i+1, j] + P.iloc[i+1, j+1]) / 2 # continous compounding
-            # P.iloc[i, j] = (P.iloc[i+1, j] + P.iloc[i+1, j+1]) / (2 * (1 + dt * r)) # discrete compounding
+            if not continuous:
+                P.iloc[i, j] = (P.iloc[i+1, j] + P.iloc[i+1, j+1]) / (2 * (1 + dt * r)) # discrete compounding
 
     # Compute replicating portfolio B
     for i in range(N-1, -1, -1):  # Loop over periods
@@ -93,6 +94,16 @@ def binomial_model(r, S_0, N, Delta, U, D, h):
 
     # Compute replicating portfolio A
     A = P - B * S
+    
+    if verbose:
+        print("====== Prices of the underlying asset ======")
+        print(S)
+        print("====== Payoffs of the derivative ======")
+        print(P)
+        print("====== Replicating portfolio a coefficients ======")
+        print(A)
+        print("====== Replicating portfolio b coefficients ======")
+        print(B)
 
     return S, P, A, B
 
@@ -100,6 +111,7 @@ def binomial_model(r, S_0, N, Delta, U, D, h):
 tests = [
     # Test case 1
     {
+        "description": "Example from lecture 7 part 2 (see https://tube.switch.ch/videos/HmXN79Stwu at 14 min 27 sec)",
         "input": {
             "r": 0.05,
             "S_0": 8,
@@ -108,11 +120,13 @@ tests = [
             "U": 2,
             "D": 0.5,
             "h": european_put(strike=40),
+            "verbose": False, # set to True to print the full tables of prices and values
+            "continuous": False, # discrete compounding as in the lecture
         },
-        "description": "Example from lecture 7 part 2 (see https://tube.switch.ch/videos/HmXN79Stwu at 14 min 27 sec)"
     },
     # Test case 2
     {
+        "description": "Homework 3 - question 3: Plum",
         "input": {
             "r": 0.0125,
             "S_0": 30,
@@ -122,7 +136,6 @@ tests = [
             "D": 1 / np.exp(0.18 * np.sqrt(365)),
             "h": plum_payoff,
         },
-        "description": "Homework 3 - question 3: Plum"
     },
 ]
 
