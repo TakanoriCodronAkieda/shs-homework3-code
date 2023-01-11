@@ -61,7 +61,7 @@ def plot_european_put(strike):
     plt.title(f"European derivative with strike price {strike}")
     plt.show()
 
-def binomial_model(r, S_0, N, Delta, U, D, h, continuous=True, verbose=False):
+def binomial_model(r, S_0, N, Delta, U, D, h, verbose=False):
     dt = Delta # it can also be Delta/N, it is a matter of convention
 
     # Create DataFrames to store prices and values of the derivative
@@ -84,8 +84,6 @@ def binomial_model(r, S_0, N, Delta, U, D, h, continuous=True, verbose=False):
     for i in range(N-1, -1, -1):  # Loop over periods
         for j in range(i+1):  # Loop over possible up and down moves
             P.iloc[i, j] = np.exp(-r * dt) * (P.iloc[i+1, j] + P.iloc[i+1, j+1]) / 2 # continous compounding
-            if not continuous:
-                P.iloc[i, j] = (P.iloc[i+1, j] + P.iloc[i+1, j+1]) / (2 * (1 + dt * r)) # discrete compounding
 
     # Compute replicating portfolio B
     for i in range(N-1, -1, -1):  # Loop over periods
@@ -111,17 +109,24 @@ def binomial_model(r, S_0, N, Delta, U, D, h, continuous=True, verbose=False):
 tests = [
     # Test case 1
     {
-        "description": "Example from lecture 7 part 2 (see https://tube.switch.ch/videos/HmXN79Stwu at 14 min 27 sec)",
+        "description": 
+"""
+Example from slide 14/24 of lecture 10.
+In this situation:
+    - the payoff function is max(40 - strike, 0)
+    - N = 3 periods each of size Delta = 4 months = 4/12 years --> this means the total time simulated is 1 year
+    - an amount q_0 at the beginning of a period grows to q_1 = q_0 * exp(r Delta) = 1.25 * q_0 at the end of the period.
+      This means that the continuously compounded risk free rate is r = ln (1.25) / Delta = 3 * ln(1.25)
+""",
         "input": {
-            "r": 0.05,
+            "r": (12 / 4) * np.log(1.25),
             "S_0": 8,
             "N": 3,
-            "Delta": 5,
+            "Delta": 4/12,
             "U": 2,
             "D": 0.5,
             "h": european_put(strike=40),
-            "verbose": False, # set to True to print the full tables of prices and values
-            "continuous": False, # discrete compounding as in the lecture
+            "verbose": True, # set to True to print the full tables of prices and values
         },
     },
     # Test case 2
@@ -135,6 +140,7 @@ tests = [
             "U": np.exp(0.18 * np.sqrt(365)), 
             "D": 1 / np.exp(0.18 * np.sqrt(365)),
             "h": plum_payoff,
+            "verbose": False, # set to True to print the full tables of prices and values
         },
     },
 ]
