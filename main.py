@@ -1,5 +1,6 @@
 import pandas as pd
 from matplotlib import pyplot as plt
+import matplotlib as mpl
 import numpy as np
 
 def european_put(strike):
@@ -164,3 +165,46 @@ for i, test in enumerate(tests):
     print(f"Initial derivative price: {initial_derivative_price}")
     print(f"Initial replicating portfolio a: {initial_replicating_a}")
     print(f"Initial replicating portfolio b: {initial_replicating_b}")
+
+# Homework 3 part 4 - Make N go through 0 to 100
+Ns = np.arange(0, 101, 1)
+P_0s = []
+As = []
+Bs = []
+
+for N in Ns:
+    params = {
+        "r": 0.0125,
+        "N": N,
+        "S_0": 30,
+        "Delta": 1/365,
+        "U": np.exp(0.18 * np.sqrt(365)), 
+        "D": 1 / np.exp(0.18 * np.sqrt(365)),
+        "h": european_put(strike=30),
+        "verbose": False, # set to True to print the full tables of prices and values
+    }
+    S, P, A, B = binomial_model(**params)
+    initial_derivative_price = P.iloc[0, 0]
+    initial_replicating_a = A.iloc[0, 0]
+    initial_replicating_b = B.iloc[0, 0]
+    P_0s.append(initial_derivative_price)
+    As.append(initial_replicating_a)
+    Bs.append(initial_replicating_b)
+
+# plot all as a function of N on the same graph
+mpl.rcParams["mathtext.fontset"] = "cm"
+plt.rcParams["font.family"] = "serif"
+plt.rcParams["figure.autolayout"] = True
+mpl.rcParams.update({'font.size': 22})
+    
+
+plt.plot(Ns, P_0s, label="$p_0$")
+plt.plot(Ns, As, label="$a$")
+plt.plot(Ns, Bs, label="$b$")
+
+plt.grid(True)
+
+plt.xlabel("$N$")
+plt.ylabel("$p_0, a, b$")
+plt.legend()
+plt.show()
