@@ -136,7 +136,7 @@ In this situation:
             "r": 0.0125,
             "S_0": 30,
             "N": 30,
-            "Delta": 30/365,
+            "Delta": 1/365,
             "U": np.exp(0.18 * np.sqrt(365)), 
             "D": 1 / np.exp(0.18 * np.sqrt(365)),
             "h": plum_payoff,
