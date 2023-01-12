@@ -166,20 +166,23 @@ for i, test in enumerate(tests):
     print(f"Initial replicating portfolio a: {initial_replicating_a}")
     print(f"Initial replicating portfolio b: {initial_replicating_b}")
 
-# Homework 3 part 4 - Make N go through 0 to 100
-Ns = np.arange(0, 101, 1)
+# Homework 3 part 4 - Make N go through 1 to 100
+Ns = np.arange(1, 101, 1)
 P_0s = []
 As = []
 Bs = []
 
 for N in Ns:
+    Delta = 15/(N * 365)
+    U = np.exp(0.18 * np.sqrt(Delta))
+    D = 1/U
     params = {
         "r": 0.0125,
         "N": N,
         "S_0": 30,
-        "Delta": 1/365,
-        "U": np.exp(0.18 * np.sqrt(365)), 
-        "D": 1 / np.exp(0.18 * np.sqrt(365)),
+        "Delta": Delta,
+        "U": U,
+        "D": D,
         "h": european_put(strike=30),
         "verbose": False, # set to True to print the full tables of prices and values
     }
