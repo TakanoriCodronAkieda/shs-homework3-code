@@ -168,14 +168,15 @@ for i, test in enumerate(tests):
 
 # Homework 3 part 4 - Make N go through 1 to 100
 Ns = np.arange(1, 101, 1)
+Deltas = 15/(Ns * 365)
+Us = np.exp(0.18 * np.sqrt(Deltas))
+Ds = 1/Us
+
 P_0s = []
 As = []
 Bs = []
 
-for N in Ns:
-    Delta = 15/(N * 365)
-    U = np.exp(0.18 * np.sqrt(Delta))
-    D = 1/U
+for N, Delta, U, D in zip(Ns, Deltas, Us, Ds):
     params = {
         "r": 0.0125,
         "N": N,
@@ -200,7 +201,6 @@ plt.rcParams["font.family"] = "serif"
 plt.rcParams["figure.autolayout"] = True
 mpl.rcParams.update({'font.size': 22})
     
-
 plt.plot(Ns, P_0s, label="$p_0$")
 plt.plot(Ns, As, label="$a$")
 plt.plot(Ns, Bs, label="$b$")
